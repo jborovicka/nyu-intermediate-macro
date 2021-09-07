@@ -118,6 +118,8 @@ def myGenerateBarPlot(param = {}):
 
     if len(p['title']) > 0:
         ax.set_title(p['title'])
+    if p['xlim'][1] > p['xlim'][0]:
+        ax.set_xlim(p['xlim'])
     if p['ylim'][1] > p['ylim'][0]:
         ax.set_ylim(p['ylim'])
     if len(p['xlabel']) > 0:
