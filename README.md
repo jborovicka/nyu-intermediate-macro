@@ -1,1 +1,1 @@
-# nyu-intermediate-macro
+# NYU Intermediate Macroeconomics ECON-UA 12
