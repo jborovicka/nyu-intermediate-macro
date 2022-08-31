@@ -6,6 +6,7 @@
 import pandas as pd
 import pandas_datareader as pdr
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import matplotlib.ticker as ticker
@@ -46,7 +47,7 @@ def myLoadDataFRED(series,transform='none',start = datetime.datetime(1800,1,1),e
 # ------------------------------------------------------------------------------
 # time series plot
 def myGenerateTSPlot(param = {}):
-    p = {'figsize' : [15,9], 'fontsize': 16,
+    p = {'figsize' : [15,9], 'fontsize': 16, 'subplots': [1,1],
          'title': '',
          'ylim': [0,0],
          'xlabel': '', 'ylabel': '',
@@ -59,36 +60,42 @@ def myGenerateTSPlot(param = {}):
     
     plt.rcParams['figure.figsize'] = p['figsize']  # Set default figure size
     plt.rcParams['font.size'] = p['fontsize']      # Set default font size
-    fig,ax = plt.subplots()
+    fig,ax = plt.subplots(p['subplots'][0],p['subplots'][1],squeeze=False)
     
-    if p['showNBERrecessions']:
-        for i in range(myNBERRecessionDates.shape[0]):
-            ax.add_patch(Rectangle((myNBERRecessionDates[i,0],p['showNBERrecessions_y'][0]),
+    for row in range(p['subplots'][0]):
+        for col in range(p['subplots'][1]):
+                     
+            if p['showNBERrecessions']:
+                for i in range(myNBERRecessionDates.shape[0]):
+                    ax[row][col].add_patch(Rectangle((myNBERRecessionDates[i,0],p['showNBERrecessions_y'][0]),
                                    myNBERRecessionDates[i,1]-myNBERRecessionDates[i,0],
                                    p['showNBERrecessions_y'][1]-p['showNBERrecessions_y'][0],
                                    facecolor=myColor['tolPaleGrey'],zorder=-1))
 
-    if len(p['title']) > 0:
-        ax.set_title(p['title'])
-    if p['xlim'][1] > p['xlim'][0]:
-        ax.set_xlim(p['xlim'])
-    if p['ylim'][1] > p['ylim'][0]:
-        ax.set_ylim(p['ylim'])
-    if len(p['xlabel']) > 0:
-        ax.set_xlabel(p['xlabel'])
-    if len(p['ylabel']) > 0:
-        ax.set_ylabel(p['ylabel'])
-    if p['showgrid']:
-        ax.grid(which='both',color = myColor['tolDarkGrey'], linestyle = ':', linewidth = 0.5)
-    if p['highlightzero']:
-        ax.plot(p['xlim'],[0,0],linewidth=1.5,color='#000000',linestyle=':')
-    if p['ylogscale']:
-        ax.set_yscale('log')
-        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, 
-            pos: ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
-        ax.yaxis.set_minor_formatter(ticker.FuncFormatter(lambda y,
-            pos: ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
+            if len(p['title']) > 0:
+                ax[row][col].set_title(p['title'])
+            if p['xlim'][1] > p['xlim'][0]:
+                ax[row][col].set_xlim(p['xlim'])
+            if p['ylim'][1] > p['ylim'][0]:
+                ax[row][col].set_ylim(p['ylim'])
+            if len(p['xlabel']) > 0:
+                ax[row][col].set_xlabel(p['xlabel'])
+            if len(p['ylabel']) > 0:
+                ax[row][col].set_ylabel(p['ylabel'])
+            if p['showgrid']:
+                ax[row][col].grid(which='both',color = myColor['tolDarkGrey'], linestyle = ':', linewidth = 0.5)
+            if p['highlightzero']:
+                ax[row][col].plot(p['xlim'],[0,0],linewidth=1.5,color='#000000',linestyle=':')
+            if p['ylogscale']:
+                ax[row][col].set_yscale('log')
+                ax[row][col].yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, 
+                    pos: ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
+                ax[row][col].yaxis.set_minor_formatter(ticker.FuncFormatter(lambda y,
+                    pos: ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(y),0)))).format(y)))
 
+    if p['subplots'] == [1,1]:
+        ax = ax[0][0];
+        
     return fig,ax;
 
 # ------------------------------------------------------------------------------
@@ -183,6 +190,17 @@ class OECDReaderSeries(_BaseReader):
 # ==============================================================================
 # recession dates and plotting recessions 
 myNBERRecessionDates = np.array([
+  [1857.46,1858.96],
+  [1860.79,1861.46],
+  [1865.29,1867.96],
+  [1869.46,1870.96],
+  [1873.79,1879.21],
+  [1882.21,1885.38],
+  [1887.21,1888.29],
+  [1890.54,1891.38],
+  [1893.04,1894.46],
+  [1895.96,1897.46],
+  [1899.46,1900.96],
   [1902.71,1904.63],
   [1907.38,1908.46],
   [1910.04,1912.04],
@@ -261,7 +279,29 @@ tolDarkCyan = '#225555',
 tolDarkGreen = '#225522',
 tolDarkYellow = '#666633',
 tolDarkRed = '#663333',
-tolDarkGrey = '#555555')
+tolDarkGrey = '#555555',
+
+# Light scheme
+tolLightBlue = '#77AADD',
+tolLightCyan = '#99DDFF',
+tolLightMint = '#44BB99',
+tolLightPear = '#BBCC33',
+tolLightOlive = '#AAAA00',
+tolLightYellow = '#EEDD88',
+tolLightOrange = '#EE8866',
+tolLightPink = '#FFAABB',
+tolLightGrey = '#DDDDDD',
+
+# Medium Contrast scheme
+tolMediumContrastWhite = '#FFFFFF',
+tolMediumContrastLightYellow = '#EECC66',
+tolMediumContrastLightRed = '#EE99AA',
+tolMediumContrastLightBlue = '#6699CC',
+tolMediumContrastDarkYellow = '#997700',
+tolMediumContrastDarkRed = '#994455',
+tolMediumContrastDarkBlue = '#004488',
+tolMediumContrastBlack = '#000000'
+)
 
 # ==============================================================================
 # color lists
