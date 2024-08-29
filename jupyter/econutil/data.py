@@ -106,4 +106,41 @@ def OECDReaderSeriesCSV(sdmx_query):
     response = urllib.request.urlopen(url, context=ctx)
 
     return pd.read_csv(response)
-    
+
+# ------------------------------------------------------------------------------
+# an updated version of the OECDReader, up to date 2024
+# download via CSV
+# API definition: https://gitlab.algobank.oecd.org/public-documentation/dotstat-migration/-/raw/main/OECD_Data_API_documentation.pdf
+# SDMX API version 1
+# https://sdmx.oecd.org/public/rest/data/<agency identifier>,<dataflow identifier>,<dataflow version>/<filter expression>[?<optional parameters>]
+# SDMX API version 2
+# https://sdmx.oecd.org/public/rest/v2/data/dataflow/<agency identifier>/<dataflow identifier>/<dataflow version>/<filter expression>[?<optional parameters>]
+
+# inputs (for details, see API definition):
+#   agency = The identifier of the agency owning the dataflow to be queried., e.g., 'OECD.SDD.NAD'
+#   dataflow = The identifier of the dataflow to be queried., e.g., 'DSD_NAAG_VI@DF_NAAG_EXP'
+#   version = The version of the dataflow to be queried., e.g., '1.0'
+#   filter = The filter expression to be applied to the dataflow., e.g., 'A..B9S13..PT_B1GQ.'
+#       obtainable by finding the particular table of interest at https://data-explorer.oecd.org/ and then clicking on the 'Developer API' button
+#   startPeriod = The start period of the data to be queried., e.g., '2000' (data from the beginning if empty)
+#   endPeriod = The end period of the data to be queried., e.g., '2023' (data to latest if empty)
+#   dimensionAtObservation = The dimension at which the observation is made., e.g., 'TIME_PERIOD' / 'AllDimensions'
+#   format = The format of the data to be returned., e.g., 'csvfile' / 'csvfilewithlabels' (the latter includes the dimension verbose labels, not just identifiers)
+
+def OECDReaderSeriesCSV2(dataflow,filter,agency='OECD.SDD.NAD',version='1.0',startPeriod='',endPeriod='',dimensionAtObservation='AllDimensions',format='csvfile'):
+    if startPeriod == '':
+        startPeriodtext = ""
+    else:
+        startPeriodtext = f"&startPeriod={startPeriod}"
+    if endPeriod == '':
+        endPeriodtext = ""
+    else:
+        endPeriodtext = f"&endPeriod={endPeriod}"
+
+    url = f"https://sdmx.oecd.org/public/rest/data/{agency},{dataflow},{version}/{filter}?dimensionAtObservation={dimensionAtObservation}{startPeriodtext}{endPeriodtext}&format={format}"
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ctx.options |= 0x4
+
+    response = urllib.request.urlopen(url, context=ctx)
+
+    return pd.read_csv(response)
