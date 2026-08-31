@@ -43,6 +43,9 @@ def LoadDataFRED(series,transform='none',start = datetime.datetime(1800,1,1),end
         if transform=='pct_change_year_ago':
             d[i][d['freq']:T] = (d[i][d['freq']:T] - d[i][0:T-d['freq']]) / d[i][0:T-d['freq']] * 100
             d[i][0:d['freq']] = float('nan')
+        if transform=='pct_change':
+            d[i][1:T] = (d[i][1:T] - d[i][0:T-1]) / d[i][0:T-1] * 100
+            d[i][0] = float('nan')
         
     return d
 
